@@ -1,0 +1,17 @@
+.data-table {
+  width: 80%;
+  border-collapse: collapse;
+  text-align: center;
+  margin: 40px auto;
+}
+
+.data-table th,
+.data-table td {
+  padding: 12px;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+.data-table th {
+  background-color: #f5f5f5;
+}

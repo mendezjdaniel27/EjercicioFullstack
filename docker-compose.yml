@@ -1,19 +1,6 @@
 version: "3.9"
 
 services:
-  backend:
-    build: ./backend
-    container_name: backend
-    ports:
-      - "5000:5000"
-    environment:
-      - DATABASE_URL=postgres://postgres:postgres@db:5432/mydb
-    volumes:
-      - ./backend/src/index.js:/app/src/index.js
-    depends_on:
-      - db
-    networks:
-      - app-network
 
   frontend:
     build: ./frontend
@@ -21,7 +8,7 @@ services:
     ports:
       - "5173:5173"
     volumes:
-      - ./frontend/src/App.jsx:/app/src/App.jsx
+      - ./frontend/src/:/app/src/
     depends_on:
       - backend
     networks:
@@ -36,9 +23,23 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: mydb
     ports:
-      - "5432:5432"
+      - "54332:5432"
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  backend:
+    build: ./backend
+    container_name: backend
+    ports:
+      - "5000:5000"
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/mydb
+    volumes:
+      - ./backend/src/index.js:/app/src/index.js
+    depends_on:
+      - db
     networks:
       - app-network
 

@@ -102,31 +102,115 @@ app.get('/api/pagos-pendientes', async (req, res) => {
 
     res.json(response);
   } catch (error) {
-    console.error('❌ Error al obtener pagos pendientes:', error);
+    console.error('Error al obtener pagos pendientes:', error);
     res.status(500).send('Error al obtener pagos pendientes');
   }
 });
 
+app.put('/api/ejecutar-pagos', async (req, res) => {
+   try {
+    const pagables = req.body.pagables;
 
-app.get('/api/users', async (req, res) => {
-  try {
-    const result = await pool.query('SELECT * FROM users');
-    res.json(result.rows);
+    for (const item of pagables) {
+      const { id, pago, client } = item;
+
+      // Actualizar status de la carga
+      await pool.query('UPDATE loans SET status = $1 WHERE id = $2', ['Pagado', id]);
+
+      // Restar el monto en accounts
+      await pool.query('UPDATE accounts SET amount = amount - $1 WHERE client = $2', [pago, client]);
+    }
+
+    res.status(200).json({ message: 'Pagos realizados correctamente' });
   } catch (error) {
-    console.error(error);
-    res.status(500).send('Error al obtener usuarios');
+    console.error('Error al ejecutar pagos:', error);
+    res.status(500).json({ error: 'Error al procesar pagos' });
   }
 });
 
-app.get('/api', async (req, res) => {
+
+app.get('/api/simular', async (req, res) => {
   try {
-    const result = await pool.query('SELECT NOW()');
-    res.json({ time: result.rows[0].now });
-  } catch (err) {
-    console.error(err);
-    res.status(500).send('Error conectando a la base de datos');
+    // 1. Obtener cuentas activas
+    const cuentasResult = await pool.query(`
+      SELECT client, amount AS amountAccount
+      FROM accounts
+      WHERE status = 'Activa'
+    `);
+
+    const cuentasMap = new Map();
+    cuentasResult.rows.forEach(cuenta => {
+      cuentasMap.set(cuenta.client, parseFloat(cuenta.amountaccount));
+    });
+
+    // 2. Obtener préstamos pendientes con IVA y sucursal
+    const loansResult = await pool.query(`
+      SELECT 
+        l.client,
+        l.id,
+        l.amount,
+        s.iva,
+        s.name AS sucursal
+      FROM loans l
+      JOIN sucursales s ON l.idSucursal = s.id
+      WHERE l.status = 'Pendiente'
+        AND l.client IN (
+          SELECT client FROM accounts WHERE status = 'Activa'
+        )
+      ORDER BY l.client, l.amount ASC
+    `);
+
+    // 3. Agrupar préstamos por cliente
+    const prestamosPorCliente = new Map();
+    for (const row of loansResult.rows) {
+      const client = row.client;
+      if (!prestamosPorCliente.has(client)) {
+        prestamosPorCliente.set(client, []);
+      }
+      prestamosPorCliente.get(client).push(row);
+    }
+
+    const pagables = [];
+    const pendientes = [];
+
+    // 4. Procesar cada cliente
+    for (const [client, prestamos] of prestamosPorCliente.entries()) {
+      let saldo = cuentasMap.get(client) ?? 0;
+
+      for (const row of prestamos) {
+        const monto = parseFloat(row.amount);
+        const iva = row.iva / 100;
+        const pago = +(monto * (1 + iva)).toFixed(2);
+
+        const prestamoInfo = {
+          client,
+          id: row.id,
+          pago,
+          sucursal: row.sucursal
+        };
+
+        if (pago <= saldo) {
+          pagables.push(prestamoInfo);
+          saldo = +(saldo - pago).toFixed(2);
+        } else {
+          pendientes.push(prestamoInfo);
+        }
+      }
+    }
+
+    res.json({ pagables, pendientes });
+  } catch (error) {
+    console.error('Error al proyectar pagos:', error);
+    res.status(500).send('Error al proyectar pagos');
   }
 });
+
+app.use(cors({
+  origin: 'http://localhost:5173', // o el puerto de tu frontend
+  methods: ['GET', 'POST', 'PUT'],
+  credentials: true
+}));
+
 
 app.listen(PORT, async () => {
   await initDB();
