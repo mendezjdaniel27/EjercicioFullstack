@@ -22,7 +22,7 @@ Pasos para ejecutar aplicacion:
 
     docker-compose up -d
 
--en caso de fallar, volver a reconstruir el contenedor con,
+-en caso de fallar, o de que no muestren los datos, favor volver a reconstruir el contenedor con,
 
     docker-compose down -v (opcional)
     docker-compose up --build -d    (reconstruir contenedor)
