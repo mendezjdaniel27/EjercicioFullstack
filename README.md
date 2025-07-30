@@ -27,7 +27,9 @@ Pasos para ejecutar aplicacion:
     docker-compose down -v (opcional)
     docker-compose up --build -d    (reconstruir contenedor)
 
--Listo para usar.
+-Listo para usar. Ingresar a
+
+    http://localhost:5713/
 
 
 
