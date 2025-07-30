@@ -206,7 +206,7 @@ app.get('/api/simular', async (req, res) => {
 });
 
 app.use(cors({
-  origin: 'http://localhost:5173', // o el puerto de tu frontend
+  origin: 'http://localhost:5173', 
   methods: ['GET', 'POST', 'PUT'],
   credentials: true
 }));

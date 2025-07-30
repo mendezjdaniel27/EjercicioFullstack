@@ -29,28 +29,7 @@ function App() {
       <div className="content">
         <Actions />
         <DataTable />
-      </div>
-
-      {/* <table className="data-table">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Nombre</th>
-                  <th>Monto</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.map((fila) => (
-                  <tr key={fila.id}>
-                    <td>{fila.id}</td>
-                    <td>{fila.nombre}</td>
-                    <td>{fila.monto}</td>
-                  </tr>
-                ))}
-              </tbody>
-      </table> */}
-
-    
+      </div>    
       
     </div>
   )

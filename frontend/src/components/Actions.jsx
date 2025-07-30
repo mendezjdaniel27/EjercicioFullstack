@@ -38,9 +38,9 @@ const Actions = () => {
         } catch (error) {
             console.error('Error al ejecutar pagos:', error);
         }
-        //console.log('Pagos ejecutados');
+
         alert('Pagos ejecutados');
-        // Aquí puedes agregar lógica real (llamada a API, cambio de estado, etc.)
+
     };
 
     return (
