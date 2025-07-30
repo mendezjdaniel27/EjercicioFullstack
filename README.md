@@ -29,7 +29,7 @@ Pasos para ejecutar aplicacion:
 
 -Listo para usar. Ingresar a
 
-    http://localhost:5713/
+    http://localhost:5173/
 
 
 
